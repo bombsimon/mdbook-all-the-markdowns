@@ -1,0 +1,12 @@
+[book]
+authors = ["Simon Sawert"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Book #1"
+
+[preprocessor.links]
+
+[preprocessor.render-all-markdown]
+command = "cargo run --manifest-path=Cargo.toml --bin mdbook-render-all-markdown"
+ignore = ["some/path"]
