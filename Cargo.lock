@@ -783,9 +783,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "log",
  "mdbook",
  "semver",
  "serde_json",
+ "toml",
+ "walkdir",
 ]
 
 [[package]]

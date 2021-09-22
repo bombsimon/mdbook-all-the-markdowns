@@ -9,4 +9,7 @@ title = "Book #1"
 
 [preprocessor.render-all-markdown]
 command = "cargo run --manifest-path=Cargo.toml --bin mdbook-render-all-markdown"
-ignore = ["some/path"]
+base = "./examples/"
+ignore = [
+    "./examples/book1/",
+]
