@@ -7,9 +7,7 @@ title = "Book #1"
 
 [preprocessor.links]
 
-[preprocessor.render-all-markdown]
-command = "cargo run --manifest-path=Cargo.toml --bin mdbook-render-all-markdown"
-base = "./examples/"
-ignore = [
-    "./examples/book1/",
-]
+[preprocessor.all-the-markdowns]
+command = "cargo run --manifest-path=Cargo.toml --bin mdbook-all-the-markdowns"
+base = "./examples/example-folder-structures/slim/"
+ignore = []

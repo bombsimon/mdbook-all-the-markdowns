@@ -5,10 +5,10 @@ use semver::{Version, VersionReq};
 use std::io;
 use std::process;
 
-use mdbook_render_all_markdown::AllMarkdown;
+use mdbook_all_the_markdowns::AllMarkdown;
 
 pub fn make_app() -> App<'static, 'static> {
-    App::new("render-all-markdown")
+    App::new("all-the-markdowns")
         .about("A mdbook preprocessor which finds markdown files and maps them 1:1")
         .subcommand(
             SubCommand::with_name("supports")

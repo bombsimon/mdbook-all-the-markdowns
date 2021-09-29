@@ -76,7 +76,7 @@ impl AllMarkdown {
 
 impl Preprocessor for AllMarkdown {
     fn name(&self) -> &str {
-        "render-all-markdown"
+        "all-the-markdowns"
     }
 
     fn run(&self, ctx: &PreprocessorContext, book: Book) -> Result<Book, Error> {
@@ -88,7 +88,7 @@ impl Preprocessor for AllMarkdown {
         finder::find_markdown_files(cfg.base, cfg.ignore)
             .iter()
             .for_each(|file| {
-                let (title, content) = file.content().unwrap();
+                let (title, content) = file.content().unwrap_or(("TODO".into(), "TODO".into()));
 
                 let mut chapter = Chapter::new(
                     title.as_str(),
