@@ -9,6 +9,25 @@ This is a [`mdbook` preprocessor][preprocessor] that will walk a specified base 
 the markdowns to your `mdbook`. This is pretty naive and will probably work best
 for smaller projects but feel free to give it a go for any folder structure!
 
+## Configuration
+
+The preprocessor can be configured with the following settings:
+
+```toml
+[preprocessor.all-the-markdowns]
+# The title to use in the index on the left.
+# Can be useful if book also consist of static content.
+section_title = "Auto generated"
+
+# The base directory to scrape, this is usually the root of your project.
+base = "./examples/example-folde
+
+# Paths to ignore. No matter where you set your base you can always ignore given
+# patterns. These needs to be relative to the base since the directory traverser
+will match if a file or director _starts with_ any of these patterns.
+ignore = []
+```
+
 ## Example
 
 Given the following folder structure:
