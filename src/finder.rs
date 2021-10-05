@@ -40,7 +40,6 @@ fn ignore_matches(ignore_patterns: Vec<String>) -> impl Fn(&DirEntry) -> bool {
 /// in a list to determine what to render.
 pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFile> {
     let mut filenames: Vec<String> = vec![];
-    let mut paths: std::collections::HashMap<String, bool> = std::collections::HashMap::new();
 
     for entry in WalkDir::new(&root)
         .follow_links(false)
@@ -55,11 +54,11 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
             continue;
         }
 
-        // This is a directory, add it to seen path to render properly.
+        // This is a directory, add it to paths to render properly. We want all the paths to be
+        // numbered. F.ex. the file foo/bar/README.md should have section 1.1.1 where foo is 1 and
+        // bar is 1.1.
         if entry.path().is_dir() {
-            // Let's add the path as a filename since we want all the paths to be numbered. F.ex.
-            // the file foo/bar/README.md should have section 1.1.1 where foo is 1 and bar is 1.1.
-            paths.insert(path_name.to_string(), true);
+            filenames.push(path_name.to_string());
             continue;
         }
 
@@ -70,10 +69,6 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
 
         //  Add markdown file to filenames.
         filenames.push(path_name.to_string());
-    }
-
-    for (p, _) in &paths {
-        filenames.push(p.to_string());
     }
 
     // Sort the file names to get deterministic order of the index.
@@ -109,8 +104,8 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
                 sections.extend(reset_vec_sections);
             }
 
-            //  Increment new sections seen to know how many sub sections to add for the
-            //  current file.
+            // Increment new sections seen to know how many sub sections to add for the current
+            // file.
             sections_for_file += 1;
             if sections_for_file >= MAX_FOLDER_DEPTH {
                 panic!("too deep folder structure - not supported!");
