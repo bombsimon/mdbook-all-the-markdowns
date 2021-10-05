@@ -4,6 +4,7 @@ use toml::value::Table;
 
 #[derive(Debug)]
 pub struct Config {
+    pub title: Option<String>,
     pub base: String,
     pub ignore: Vec<String>,
 }
@@ -11,6 +12,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Config {
         Config {
+            title: None,
             base: "./".into(),
             ignore: vec![],
         }
@@ -26,6 +28,26 @@ impl<'a> TryFrom<Option<&'a Table>> for Config {
             Some(c) => c,
             None => return Ok(cfg),
         };
+
+        if let Some(title) = mdbook_cfg.get("section_title") {
+            let title = match title.as_str() {
+                Some(m) => {
+                    if m != "" {
+                        Some(m.to_string())
+                    } else {
+                        None
+                    }
+                }
+                None => {
+                    return Err(Error::msg(format!(
+                        "'title' {:?} is not a valid string",
+                        title
+                    )))
+                }
+            };
+
+            cfg.title = title;
+        }
 
         if let Some(base) = mdbook_cfg.get("base") {
             let base = match base.as_str() {

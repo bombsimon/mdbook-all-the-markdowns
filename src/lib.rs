@@ -26,7 +26,10 @@ impl Preprocessor for AllMarkdown {
         let cfg: Config = ctx.config.get_preprocessor(self.name()).try_into().unwrap();
 
         let mut b = book.clone();
-        b.push_item(BookItem::PartTitle("Auto generated".into()));
+
+        if let Some(title) = cfg.title {
+            b.push_item(BookItem::PartTitle(title));
+        }
 
         finder::find_markdown_files(cfg.base, cfg.ignore)
             .iter()
