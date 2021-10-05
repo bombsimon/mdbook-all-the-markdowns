@@ -20,11 +20,11 @@ The preprocessor can be configured with the following settings:
 section_title = "Auto generated"
 
 # The base directory to scrape, this is usually the root of your project.
-base = "./examples/example-folde
+base = "./examples/example-folder"
 
 # Paths to ignore. No matter where you set your base you can always ignore given
 # patterns. These needs to be relative to the base since the directory traverser
-will match if a file or director _starts with_ any of these patterns.
+# will match if a file or director _starts with_ any of these patterns.
 ignore = []
 ```
 
