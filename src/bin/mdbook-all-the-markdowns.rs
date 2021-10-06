@@ -19,8 +19,6 @@ pub fn make_app() -> App<'static, 'static> {
 
 fn main() {
     let matches = make_app().get_matches();
-
-    // Users will want to construct their own preprocessor here
     let preprocessor = AllMarkdown::new();
 
     if let Some(sub_args) = matches.subcommand_matches("supports") {
@@ -58,9 +56,5 @@ fn handle_supports(pre: &dyn Preprocessor, sub_args: &ArgMatches) -> ! {
     let supported = pre.supports_renderer(renderer);
 
     // Signal whether the renderer is supported by exiting with 1 or 0.
-    if supported {
-        process::exit(0);
-    } else {
-        process::exit(1);
-    }
+    process::exit(if supported { 0 } else { 1 });
 }

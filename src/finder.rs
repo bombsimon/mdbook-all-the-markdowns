@@ -17,7 +17,7 @@ pub struct MarkdownFile {
 /// ignore_matches will be used as a filter when walking down the folder structure by iterating
 /// over all the directories added as ignore.
 fn ignore_matches(ignore_patterns: Vec<String>) -> impl Fn(&DirEntry) -> bool {
-    let ignore = move |entry: &DirEntry| -> bool {
+    move |entry: &DirEntry| -> bool {
         !entry
             .path()
             .to_str()
@@ -31,9 +31,7 @@ fn ignore_matches(ignore_patterns: Vec<String>) -> impl Fn(&DirEntry) -> bool {
                 false
             })
             .unwrap_or(false)
-    };
-
-    ignore
+    }
 }
 
 /// Find all markdown files by iterating from the `root` and store all folders and markdown files
@@ -97,7 +95,7 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
     }
 
     // Sort the file names to get deterministic order of the index.
-    filenames.sort_by(|a, b| a.partial_cmp(&b).unwrap());
+    filenames.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
     let mut sections: Vec<String> = vec!["".into(); MAX_FOLDER_DEPTH];
     let mut section_ids = vec![0; MAX_FOLDER_DEPTH];
@@ -159,7 +157,7 @@ impl MarkdownFile {
                 .replace("-", " ")
                 .replace("_", " ")
                 .to_title_case();
-            let content = format!("# {}", title.clone());
+            let content = format!("# {}", title);
 
             return Ok((title, content));
         }
@@ -168,12 +166,9 @@ impl MarkdownFile {
         let title = contents
             .lines()
             .next()
-            .ok_or(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "could not get header",
-            ))?
+            .ok_or(std::io::ErrorKind::InvalidData)?
             .replace("# ", "");
 
-        Ok((title.into(), contents))
+        Ok((title, contents))
     }
 }
