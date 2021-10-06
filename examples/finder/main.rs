@@ -4,8 +4,8 @@ fn main() -> Result<(), &'static str> {
     println!("Finder example");
 
     let markdowns = finder::find_markdown_files(
-        "./examples/".into(),
-        vec!["./examples/book1".into(), "./examples/finder".into()],
+        "./examples/example-folder-structures/filter-empty/".into(),
+        vec![],
     );
 
     println!("{:#?}", markdowns);

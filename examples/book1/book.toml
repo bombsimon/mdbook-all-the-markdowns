@@ -10,5 +10,5 @@ title = "Book #1"
 [preprocessor.all-the-markdowns]
 section_title = "Auto generated"
 command = "cargo run --manifest-path=Cargo.toml --bin mdbook-all-the-markdowns"
-base = "./examples/example-folder-structures/deep-nested/"
+base = "./examples/example-folder-structures/filter-empty/"
 ignore = []

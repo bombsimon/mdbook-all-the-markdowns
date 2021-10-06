@@ -54,11 +54,8 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
             continue;
         }
 
-        // This is a directory, add it to paths to render properly. We want all the paths to be
-        // numbered. F.ex. the file foo/bar/README.md should have section 1.1.1 where foo is 1 and
-        // bar is 1.1.
+        // Skip directories, we'll resolve them once we found all markdown files.
         if entry.path().is_dir() {
-            filenames.push(path_name.to_string());
             continue;
         }
 
@@ -71,6 +68,34 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
         filenames.push(path_name.to_string());
     }
 
+    // We want to add all folders leading up to a markdown file but so we create a set of all
+    // parent paths leading up to each markdown file. This way we can omit empty directories or
+    // paths not leading to any markdown file. In the end we want to mark each section of a path as
+    // a (sub) chapter.
+    // F.ex. the file foo/bar/README.md should have section 1.1.1 where foo is 1 and
+    // bar is 1.1.
+    let mut parents = std::collections::HashSet::new();
+    for path in filenames.iter() {
+        let trimmed = path.replace(&root, "");
+        let p = Path::new(trimmed.as_str());
+
+        let mut parent_path = vec![];
+
+        for c in p.components() {
+            let component = c.as_os_str().to_str().unwrap();
+            if component.ends_with(".md") {
+                break;
+            }
+
+            parent_path.push(component);
+            parents.insert(parent_path.join("/"));
+        }
+    }
+
+    for parent in parents {
+        filenames.push(format!("{}{}", &root, parent));
+    }
+
     // Sort the file names to get deterministic order of the index.
     filenames.sort_by(|a, b| a.partial_cmp(&b).unwrap());
 
@@ -79,11 +104,11 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
     let mut markdowns: Vec<MarkdownFile> = vec![];
 
     for path in filenames.iter() {
-        let mut sections_for_file = 0;
-        let is_folder = !path.ends_with(".md");
-
         let trimmed = path.replace(&root, "");
         let p = Path::new(trimmed.as_str());
+
+        let mut sections_for_file = 0;
+        let is_folder = !path.ends_with(".md");
 
         for (i, c) in p.components().enumerate() {
             let section_name = c.as_os_str().to_str().unwrap();
@@ -99,7 +124,7 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
                 section_ids = section_ids[0..i + 1].to_vec();
                 section_ids.extend(reset_vec);
 
-                let reset_vec_sections = vec!["".into(); 24 - i];
+                let reset_vec_sections = vec!["".into(); MAX_FOLDER_DEPTH - i];
                 sections = sections[0..i + 1].to_vec();
                 sections.extend(reset_vec_sections);
             }
