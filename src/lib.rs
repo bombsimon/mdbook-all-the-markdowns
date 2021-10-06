@@ -17,6 +17,12 @@ impl AllMarkdown {
     }
 }
 
+impl Default for AllMarkdown {
+    fn default() -> AllMarkdown {
+        AllMarkdown
+    }
+}
+
 impl Preprocessor for AllMarkdown {
     fn name(&self) -> &str {
         "all-the-markdowns"
@@ -24,8 +30,7 @@ impl Preprocessor for AllMarkdown {
 
     fn run(&self, ctx: &PreprocessorContext, book: Book) -> Result<Book, Error> {
         let cfg: Config = ctx.config.get_preprocessor(self.name()).try_into().unwrap();
-
-        let mut b = book.clone();
+        let mut b = book;
 
         if let Some(title) = cfg.title {
             b.push_item(BookItem::PartTitle(title));
@@ -45,7 +50,7 @@ impl Preprocessor for AllMarkdown {
                     vec![],
                 );
 
-                chapter.number = Some(SectionNumber(file.section.clone().into()));
+                chapter.number = Some(SectionNumber(file.section.clone()));
 
                 b.push_item(BookItem::Chapter(chapter));
             });
