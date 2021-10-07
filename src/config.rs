@@ -32,7 +32,7 @@ impl<'a> TryFrom<Option<&'a Table>> for Config {
         if let Some(title) = mdbook_cfg.get("section_title") {
             let title = match title.as_str() {
                 Some(m) => {
-                    if m.is_empty() {
+                    if !m.is_empty() {
                         Some(m.to_string())
                     } else {
                         None
