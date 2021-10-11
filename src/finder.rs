@@ -1,5 +1,5 @@
 use inflector::Inflector;
-use std::path::Path;
+use std::path::PathBuf;
 use std::{fs, io};
 use walkdir::{DirEntry, WalkDir};
 
@@ -37,7 +37,7 @@ fn ignore_matches(ignore_patterns: Vec<String>) -> impl Fn(&DirEntry) -> bool {
 /// Find all markdown files by iterating from the `root` and store all folders and markdown files
 /// in a list to determine what to render.
 pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFile> {
-    let mut filenames: Vec<String> = vec![];
+    let mut filenames = vec![];
 
     for entry in WalkDir::new(&root)
         .follow_links(false)
@@ -45,25 +45,27 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
         .filter_entry(ignore_matches(ignore))
         .filter_map(|e| e.ok())
     {
-        let path_name = entry.path().to_str().unwrap();
-
-        // Skip starting directory.
-        if path_name == root {
-            continue;
-        }
-
         // Skip directories, we'll resolve them once we found all markdown files.
         if entry.path().is_dir() {
             continue;
         }
 
+        // Skip starting directory.
+        if let Some(path) = entry.path().to_str() {
+            if path == root {
+                continue;
+            }
+        }
+
         // A file is found but it's not a markdown file, move on.
-        if !path_name.ends_with(".md") {
-            continue;
+        if let Some(ex) = entry.path().extension() {
+            if ex != "md" {
+                continue;
+            }
         }
 
         //  Add markdown file to filenames.
-        filenames.push(path_name.to_string());
+        filenames.push(entry.path().to_path_buf());
     }
 
     // We want to add all folders leading up to a markdown file but so we create a set of all
@@ -73,43 +75,84 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
     // F.ex. the file foo/bar/README.md should have section 1.1.1 where foo is 1 and
     // bar is 1.1.
     let mut parents = std::collections::HashSet::new();
+    let mut folder_has_readme_md = std::collections::HashSet::new();
+
     for path in filenames.iter() {
-        let trimmed = path.replace(&root, "");
-        let p = Path::new(trimmed.as_str());
+        let mut path_buf = PathBuf::new();
 
-        let mut parent_path = vec![];
+        for c in path.components() {
+            path_buf = path_buf.join(c);
 
-        for c in p.components() {
-            let component = c.as_os_str().to_str().unwrap();
-            if component.ends_with(".md") {
-                break;
+            // Don't add any paths until we've passed the root.
+            if path_buf.to_string_lossy().len() <= root.len() {
+                continue;
             }
 
-            parent_path.push(component);
-            parents.insert(parent_path.join("/"));
+            if let Some(ex) = path_buf.extension() {
+                if ex == "md" {
+                    if path_buf.ends_with("README.md") {
+                        folder_has_readme_md.insert(path.parent().unwrap().to_path_buf());
+                    }
+
+                    break;
+                }
+            }
+
+            parents.insert(path_buf.clone());
         }
     }
 
     for parent in parents {
-        filenames.push(format!("{}{}", &root, parent));
+        if !folder_has_readme_md.contains(&parent) {
+            filenames.push(parent);
+        }
     }
 
     // Sort the file names to get deterministic order of the index.
-    filenames.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    filenames.sort_by(|a, b| {
+        let a_parent = a.parent().unwrap();
+        let b_parent = b.parent().unwrap();
+
+        // If the paths are not the same use regular alphanumeric sorting.
+        if a_parent != b_parent {
+            return a.partial_cmp(b).unwrap();
+        }
+
+        // If one of them is the parent dir itself continue with regular sorting.
+        if a.is_dir() || b.is_dir() {
+            return a.partial_cmp(b).unwrap();
+        }
+
+        // If the paths are the same, ensure we sort README.md first so the section number is
+        // correct even if there are files that would be sorted alphanumerically before.
+        // For example; if we have two files /foo/README.md and /foo/INSTALLATION.md we want to
+        // sort README.md first because it will automatically get assigned section number [1] where
+        // INSTALLATION.md would be [1, 1].
+        match a.file_name() {
+            Some(v) if v == "README.md" => std::cmp::Ordering::Less,
+            _ => std::cmp::Ordering::Greater,
+        }
+    });
 
     let mut sections: Vec<String> = vec!["".into(); MAX_FOLDER_DEPTH];
     let mut section_ids = vec![0; MAX_FOLDER_DEPTH];
     let mut markdowns: Vec<MarkdownFile> = vec![];
 
     for path in filenames.iter() {
-        let trimmed = path.replace(&root, "");
-        let p = Path::new(trimmed.as_str());
-
         let mut sections_for_file = 0;
-        let is_folder = !path.ends_with(".md");
+        let is_folder = path.is_dir();
+        let path_witout_prefix = match path.strip_prefix(&root) {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
 
-        for (i, c) in p.components().enumerate() {
+        for (i, c) in path_witout_prefix.components().enumerate() {
             let section_name = c.as_os_str().to_str().unwrap();
+
+            // If this is README.md, don't increment any IDs, treat this as the folder.
+            if section_name == "README.md" {
+                continue;
+            }
 
             // If the section is new, increment the ID.
             if sections[i] != section_name || section_name.ends_with(".md") {
@@ -136,8 +179,8 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
         }
 
         markdowns.push(MarkdownFile {
-            name: p.file_name().unwrap().to_string_lossy().to_string(),
-            filename: path.to_string(),
+            name: path.file_name().unwrap().to_string_lossy().to_string(),
+            filename: path.as_os_str().to_str().unwrap().to_string(),
             section: section_ids[0..sections_for_file].to_vec(),
             is_folder,
         });
