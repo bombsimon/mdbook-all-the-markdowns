@@ -1,9 +1,11 @@
 [package]
 name = "mdbook-all-the-markdowns"
-version = "0.1.0"
+description = "Render all markdown files in a given folder structure"
+license = "MIT"
+version = "0.2.0"
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+homepage = "https://github.com/bombsimon/mdbook-all-the-markdowns"
+repository = "https://github.com/bombsimon/mdbook-all-the-markdowns"
 
 [dependencies]
 Inflector = "0.11.4"
