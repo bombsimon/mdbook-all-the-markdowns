@@ -801,7 +801,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-all-the-markdowns"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "Inflector",
  "clap",
