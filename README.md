@@ -5,6 +5,15 @@
   <br>
 </h1>
 
+<div align="center">
+  <a href="https://github.com/bombsimon/mdbook-all-the-markdowns/actions/workflows/rust.yml">
+    <img src="https://github.com/bombsimon/mdbook-all-the-markdowns/actions/workflows/rust.yml/badge.svg">
+  </a>
+  <a href="https://crates.io/crates/mdbook-all-the-markdowns">
+    <img src="https://img.shields.io/crates/v/mdbook-all-the-markdowns.svg">
+  </a>
+</div>
+
 This is a [`mdbook` preprocessor][preprocessor] that will walk a specified base path and add all
 the markdowns to your `mdbook`. This is pretty naive and will probably work best
 for smaller projects but feel free to give it a go for any folder structure!
