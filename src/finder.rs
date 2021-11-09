@@ -206,11 +206,13 @@ impl MarkdownFile {
         }
 
         let contents = fs::read_to_string(self.filename.clone())?;
-        let title = contents
+        let raw_title = contents
             .lines()
             .next()
-            .ok_or(std::io::ErrorKind::InvalidData)?
-            .replace("# ", "");
+            .ok_or(std::io::ErrorKind::InvalidData)?;
+
+        let re = regex::Regex::new(r"^#+\s*").unwrap();
+        let title = re.replace_all(raw_title, "").to_string();
 
         Ok((title, contents))
     }
