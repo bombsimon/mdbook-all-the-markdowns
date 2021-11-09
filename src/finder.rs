@@ -31,7 +31,18 @@ fn ignore_matches(ignore_patterns: Vec<String>) -> impl Fn(&DirEntry) -> bool {
                 false
             })
             .unwrap_or(false)
+            && !is_hidden(entry)
     }
+}
+
+/// is_hidden returns true if the file is a hidden file. We use it to ignore these files when
+/// looking for markdown files.
+fn is_hidden(entry: &DirEntry) -> bool {
+    entry
+        .file_name()
+        .to_str()
+        .map(|s| s.starts_with("."))
+        .unwrap_or(false)
 }
 
 /// Find all markdown files by iterating from the `root` and store all folders and markdown files
@@ -62,6 +73,9 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
             if ex != "md" {
                 continue;
             }
+        } else {
+            // Not even a file extension? Skip it!
+            continue;
         }
 
         //  Add markdown file to filenames.
