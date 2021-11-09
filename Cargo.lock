@@ -807,6 +807,7 @@ dependencies = [
  "clap",
  "log",
  "mdbook",
+ "regex",
  "semver",
  "serde_json",
  "toml",
