@@ -222,6 +222,7 @@ impl MarkdownFile {
         let contents = fs::read_to_string(self.filename.clone())?;
         let raw_title = contents
             .lines()
+            .filter(|l| !l.is_empty())
             .next()
             .ok_or(std::io::ErrorKind::InvalidData)?;
 
