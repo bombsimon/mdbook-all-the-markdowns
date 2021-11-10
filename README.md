@@ -24,6 +24,10 @@ The preprocessor can be configured with the following settings:
 
 ```toml
 [preprocessor.all-the-markdowns]
+# This will mark all folders generated for a proper index as draft, making them
+# non clickable. By default this is false and the content will just be the name
+# of the folder as title.
+draft-folders = true
 
 [[preprocessor.all-the-markdowns.section]]
 # The title to use in the index on the left. Can be useful if book also consist

@@ -12,6 +12,7 @@ pub struct Section {
 #[derive(Debug)]
 pub struct Config {
     pub sections: Vec<Section>,
+    pub draft_folders: bool,
 }
 
 impl Default for Section {
@@ -26,7 +27,10 @@ impl Default for Section {
 
 impl Default for Config {
     fn default() -> Config {
-        Config { sections: vec![] }
+        Config {
+            sections: vec![],
+            draft_folders: false,
+        }
     }
 }
 
@@ -39,6 +43,10 @@ impl<'a> TryFrom<Option<&'a Table>> for Config {
             Some(c) => c,
             None => return Ok(cfg),
         };
+
+        if let Some(df) = mdbook_cfg.get("draft-folders") {
+            cfg.draft_folders = df.as_bool().unwrap_or(false);
+        }
 
         if let Some(sections) = mdbook_cfg.get("section") {
             let section_array = sections.as_array().unwrap();

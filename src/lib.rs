@@ -30,6 +30,7 @@ impl Preprocessor for AllMarkdown {
 
     fn run(&self, ctx: &PreprocessorContext, book: Book) -> Result<Book, Error> {
         let cfg: Config = ctx.config.get_preprocessor(self.name()).try_into().unwrap();
+        let draft_folders = cfg.draft_folders.clone();
         let mut b = book;
 
         for section in cfg.sections {
@@ -44,15 +45,18 @@ impl Preprocessor for AllMarkdown {
                         .content()
                         .unwrap_or(("UNKNOWN".into(), "Could not get file content".into()));
 
-                    let mut chapter = Chapter::new(
-                        title.as_str(),
-                        content,
-                        PathBuf::from(file.filename.clone()),
-                        vec![],
-                    );
+                    let mut chapter = if draft_folders && file.is_folder {
+                        Chapter::new_draft(title.as_str(), vec![])
+                    } else {
+                        Chapter::new(
+                            title.as_str(),
+                            content,
+                            PathBuf::from(file.filename.clone()),
+                            vec![],
+                        )
+                    };
 
                     chapter.number = Some(SectionNumber(file.section.clone()));
-
                     b.push_item(BookItem::Chapter(chapter));
                 });
         }
