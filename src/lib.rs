@@ -32,28 +32,30 @@ impl Preprocessor for AllMarkdown {
         let cfg: Config = ctx.config.get_preprocessor(self.name()).try_into().unwrap();
         let mut b = book;
 
-        if let Some(title) = cfg.title {
-            b.push_item(BookItem::PartTitle(title));
+        for section in cfg.sections {
+            if let Some(title) = section.title {
+                b.push_item(BookItem::PartTitle(title));
+            }
+
+            finder::find_markdown_files(section.base, section.ignore)
+                .iter()
+                .for_each(|file| {
+                    let (title, content) = file
+                        .content()
+                        .unwrap_or(("UNKNOWN".into(), "Could not get file content".into()));
+
+                    let mut chapter = Chapter::new(
+                        title.as_str(),
+                        content,
+                        PathBuf::from(file.filename.clone()),
+                        vec![],
+                    );
+
+                    chapter.number = Some(SectionNumber(file.section.clone()));
+
+                    b.push_item(BookItem::Chapter(chapter));
+                });
         }
-
-        finder::find_markdown_files(cfg.base, cfg.ignore)
-            .iter()
-            .for_each(|file| {
-                let (title, content) = file
-                    .content()
-                    .unwrap_or(("UNKNOWN".into(), "Could not get file content".into()));
-
-                let mut chapter = Chapter::new(
-                    title.as_str(),
-                    content,
-                    PathBuf::from(file.filename.clone()),
-                    vec![],
-                );
-
-                chapter.number = Some(SectionNumber(file.section.clone()));
-
-                b.push_item(BookItem::Chapter(chapter));
-            });
 
         Ok(b)
     }

@@ -24,16 +24,27 @@ The preprocessor can be configured with the following settings:
 
 ```toml
 [preprocessor.all-the-markdowns]
-# The title to use in the index on the left.
-# Can be useful if book also consist of static content.
-section_title = "Auto generated"
 
-# The base directory to scrape, this is usually the root of your project.
-base = "./examples/example-folder"
+[[preprocessor.all-the-markdowns.section]]
+title = "Auto generated"
+base = "./examples/example-folder-structures/slim"
+ignore = []
+```
 
-# Paths to ignore. No matter where you set your base you can always ignore given
-# patterns. These needs to be relative to the base since the directory traverser
-# will match if a file or director _starts with_ any of these patterns.
+Since `section` is a list of tables you can add multiple groups by adding
+multiple sections.
+
+```toml
+[preprocessor.all-the-markdowns]
+
+[[preprocessor.all-the-markdowns.section]]
+title = "Libraries"
+base = "./examples/example-folder-structures/slim/my-libraries"
+ignore = []
+
+[[preprocessor.all-the-markdowns.section]]
+title = "Services"
+base = "./examples/example-folder-structures/slim/my-services"
 ignore = []
 ```
 
@@ -48,20 +59,34 @@ Given the following folder structure:
 │       ├── INSTALLATION.md
 │       ├── README.md
 │       ├── sub-lib-a
-│       │   └── README.md
+│       │   ├── CONTRIBUTORS.md
+│       │   ├── README.md
+│       │   └── USAGE.md
 │       └── sub-lib-b
 │           └── README.md
 └── my-services
     ├── service-bar
-    │   └── README.md
+    │   ├── README.md
+    │   └── infra
+    │       └── kubernetes
+    │           └── README.md
     └── service-foo
         └── README.md
 ```
 
 Based on the title in each document, combined with the folder names as title
-case, the preprocessor would render the following:
+case, the preprocessor with the first configuration would render the following:
 
-![example](./assets/example-index.png)
+<table>
+  <tr>
+    <td width="440" align="center"><img src="./assets/example-index.png"></td>
+    <td width="440" align="center"><img src="./assets/example-index-2.png"></td>
+  </tr>
+  <tr>
+    <td align="center">Result with the first example with one section.</td>
+    <td align="center">Result with the second example with multiple sections.</td>
+  </tr>
+</table>
 
 ## Test
 
