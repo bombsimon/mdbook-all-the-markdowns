@@ -26,8 +26,17 @@ The preprocessor can be configured with the following settings:
 [preprocessor.all-the-markdowns]
 
 [[preprocessor.all-the-markdowns.section]]
+# The title to use in the index on the left. Can be useful if book also consist
+# of static content or if creating multiple sections.
 title = "Auto generated"
+
+# The base directory to find markdowns in, this is usually the root of your
+# project if you're only creating a single section.
 base = "./examples/example-folder-structures/slim"
+
+# Paths to ignore. No matter where you set your base you can always ignore given
+# patterns. These needs to be relative to the base since the directory traverser
+# will match if a file or director _starts with_ any of these patterns.
 ignore = []
 ```
 
