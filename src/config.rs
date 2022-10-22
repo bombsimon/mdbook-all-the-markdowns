@@ -13,6 +13,7 @@ pub struct Section {
 pub struct Config {
     pub sections: Vec<Section>,
     pub draft_folders: bool,
+    pub index_filenames: Vec<String>,
 }
 
 impl Default for Section {
@@ -30,6 +31,7 @@ impl Default for Config {
         Config {
             sections: vec![],
             draft_folders: false,
+            index_filenames: vec!["README.md".to_string()],
         }
     }
 }
@@ -46,6 +48,20 @@ impl<'a> TryFrom<Option<&'a Table>> for Config {
 
         if let Some(df) = mdbook_cfg.get("draft-folders") {
             cfg.draft_folders = df.as_bool().unwrap_or(false);
+        }
+
+        if let Some(indexes) = mdbook_cfg.get("index-names") {
+            let mut filenames: Vec<String> = vec![];
+
+            if let Some(indexes) = indexes.as_array() {
+                for index in indexes {
+                    if let Some(i) = index.as_str() {
+                        filenames.push(i.into())
+                    }
+                }
+            }
+
+            cfg.index_filenames = filenames;
         }
 
         if let Some(sections) = mdbook_cfg.get("section") {

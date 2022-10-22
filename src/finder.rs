@@ -47,7 +47,11 @@ fn is_hidden(entry: &DirEntry) -> bool {
 
 /// Find all markdown files by iterating from the `root` and store all folders and markdown files
 /// in a list to determine what to render.
-pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFile> {
+pub fn find_markdown_files(
+    index_filenames: &[String],
+    root: String,
+    ignore: Vec<String>,
+) -> Vec<MarkdownFile> {
     let mut filenames = vec![];
 
     for entry in WalkDir::new(&root)
@@ -89,7 +93,7 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
     // F.ex. the file foo/bar/README.md should have section 1.1.1 where foo is 1 and
     // bar is 1.1.
     let mut parents = std::collections::HashSet::new();
-    let mut folder_has_readme_md = std::collections::HashSet::new();
+    let mut folder_has_index_md = std::collections::HashSet::new();
 
     for path in filenames.iter() {
         let mut path_buf = PathBuf::new();
@@ -104,8 +108,11 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
 
             if let Some(ex) = path_buf.extension() {
                 if ex == "md" {
-                    if path_buf.ends_with("README.md") {
-                        folder_has_readme_md.insert(path.parent().unwrap().to_path_buf());
+                    if index_filenames
+                        .iter()
+                        .any(|filename| path_buf.ends_with(filename))
+                    {
+                        folder_has_index_md.insert(path.parent().unwrap().to_path_buf());
                     }
 
                     break;
@@ -117,7 +124,7 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
     }
 
     for parent in parents {
-        if !folder_has_readme_md.contains(&parent) {
+        if !folder_has_index_md.contains(&parent) {
             filenames.push(parent);
         }
     }
@@ -137,13 +144,19 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
             return a.partial_cmp(b).unwrap();
         }
 
-        // If the paths are the same, ensure we sort README.md first so the section number is
-        // correct even if there are files that would be sorted alphanumerically before.
-        // For example; if we have two files /foo/README.md and /foo/INSTALLATION.md we want to
-        // sort README.md first because it will automatically get assigned section number [1] where
-        // INSTALLATION.md would be [1, 1].
+        // If the paths are the same, ensure we sort indexes first so the section number is correct
+        // even if there are files that would be sorted alphanumerically before. For example; if we
+        // have two files /foo/README.md and /foo/INSTALLATION.md we want to sort README.md first
+        // because it will automatically get assigned section number [1] where INSTALLATION.md
+        // would be [1, 1].
         match a.file_name() {
-            Some(v) if v == "README.md" => std::cmp::Ordering::Less,
+            Some(v)
+                if index_filenames
+                    .iter()
+                    .any(|filename| v == filename.as_str()) =>
+            {
+                std::cmp::Ordering::Less
+            }
             _ => std::cmp::Ordering::Greater,
         }
     });
@@ -164,7 +177,10 @@ pub fn find_markdown_files(root: String, ignore: Vec<String>) -> Vec<MarkdownFil
             let section_name = c.as_os_str().to_str().unwrap();
 
             // If this is README.md, don't increment any IDs, treat this as the folder.
-            if section_name == "README.md" {
+            if index_filenames
+                .iter()
+                .any(|filename| section_name == filename)
+            {
                 continue;
             }
 

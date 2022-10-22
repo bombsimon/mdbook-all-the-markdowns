@@ -9,6 +9,8 @@ title = "Book #1"
 
 [preprocessor.all-the-markdowns]
 command = "cargo run --manifest-path=Cargo.toml --bin mdbook-all-the-markdowns"
+draft-folders = false
+index-names = ["README.md", "default.md"]
 
 [[preprocessor.all-the-markdowns.section]]
 title = "Libraries"
@@ -18,4 +20,9 @@ ignore = []
 [[preprocessor.all-the-markdowns.section]]
 title = "Services"
 base = "./examples/example-folder-structures/slim/my-services"
+ignore = []
+
+[[preprocessor.all-the-markdowns.section]]
+title = "A lot of things"
+base = "./examples/example-folder-structures/deep-nested"
 ignore = []
