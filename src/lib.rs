@@ -30,7 +30,7 @@ impl Preprocessor for AllMarkdown {
 
     fn run(&self, ctx: &PreprocessorContext, book: Book) -> Result<Book, Error> {
         let cfg: Config = ctx.config.get_preprocessor(self.name()).try_into().unwrap();
-        let draft_folders = cfg.draft_folders.clone();
+        let draft_folders = cfg.draft_folders;
         let mut b = book;
 
         for section in cfg.sections {

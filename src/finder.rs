@@ -41,7 +41,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.starts_with("."))
+        .map(|s| s.starts_with('.'))
         .unwrap_or(false)
 }
 
@@ -227,8 +227,8 @@ impl MarkdownFile {
             // Seems good enough: https://stackoverflow.com/a/27086669/2274551
             let title = self
                 .name
-                .replace("-", " ")
-                .replace("_", " ")
+                .replace('-', " ")
+                .replace('_', " ")
                 .to_title_case();
             let content = format!("# {}", title);
 
@@ -238,8 +238,7 @@ impl MarkdownFile {
         let contents = fs::read_to_string(self.filename.clone())?;
         let raw_title = contents
             .lines()
-            .filter(|l| !l.is_empty())
-            .next()
+            .find(|l| !l.is_empty())
             .ok_or(std::io::ErrorKind::InvalidData)?;
 
         let re = regex::Regex::new(r"^#+\s*").unwrap();
