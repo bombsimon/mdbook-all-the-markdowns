@@ -28,6 +28,9 @@ The preprocessor can be configured with the following settings:
 # non clickable. By default this is false and the content will just be the name
 # of the folder as title.
 draft-folders = true
+# If you want to allow more or other files than `README.md` to be treated as top
+# level index files you can specify them in `index-filenames`.
+index-filenames = ["README.md", "index.md"]
 
 [[preprocessor.all-the-markdowns.section]]
 # The title to use in the index on the left. Can be useful if book also consist

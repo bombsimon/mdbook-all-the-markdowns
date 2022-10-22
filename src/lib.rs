@@ -38,7 +38,7 @@ impl Preprocessor for AllMarkdown {
                 b.push_item(BookItem::PartTitle(title));
             }
 
-            finder::find_markdown_files(section.base, section.ignore)
+            finder::find_markdown_files(&cfg.index_filenames, section.base, section.ignore)
                 .iter()
                 .for_each(|file| {
                     let (title, content) = file
